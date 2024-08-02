@@ -49,3 +49,9 @@
 
 -   쓰기 연산을 효율적으로 하기 위한 파일 시스템으로 메모리에 버퍼를 두어 업데이트를 저장했다가(buffering) 한번에 디스크에 쓴다.
 -   Log-structured란 비어 있는 자리에 순차적으로 기록하겠다는 뜻!
+
+### Page fault와 Segmentation fault의 차이점
+
+-   Page fault는 필요한 페이지가 메모리에 없어서 디스크에서 가져와야 하는 상황을 말한다.
+-   Segmentation fault는 잘못된 메모리 접근으로 올바르지 않은 메모리 주소를 참조한 상황을 말한다.
+-   Page fault는 페이지를 swap space(디스크)에서 가져오지만 Segmentation fault는 잘못된 주소를 접근했기 때문에 프로세스를 중단한다.
