@@ -16,12 +16,6 @@
 -   프로그램을 여러 개의 블록으로 분할해서 필요한 블록만 메모리에 적재해서 사용하는 기법이다.
     필요한 블록 이외 나머지 블록들은 Swap device(디스크)에 존재한다.
 
-#### Page fault란 무엇인가?
-
--   참조한 페이지가 물리적 메모리인 RAM에 존재하지 않는 상황을 말한다.
--   프로세스의 전체 페이지가 적재되어 있는 Swap device(디스크)에서 페이지를 가져온다.
--   메인 메모리로 디스크 I/O가 발생하므로 입출력 병목현상이 따른다.
-
 ### TLB(Translation Lookaside Buffer)란 무엇인가?
 
 -   가상 메모리 주소를 물리적 주소로 변환하는 속도를 높이기 위해 사용하는 캐시
@@ -47,11 +41,27 @@
 
 ### LFS(Log-structured File System)이란 무엇인가?
 
--   쓰기 연산을 효율적으로 하기 위한 파일 시스템으로 메모리에 버퍼를 두어 업데이트를 저장했다가(buffering) 한번에 디스크에 쓴다.
+-   쓰기 연산을 효율적으로 하기 위한 파일 시스템으로 메모리에 버퍼를 두어 업데이트를 저장했다가(buffering) 한번에 디스크에 순차적으로 쓴다.
 -   Log-structured란 비어 있는 자리에 순차적으로 기록하겠다는 뜻!
+
+#### Page fault란 무엇인가?
+
+-   참조한 페이지가 물리적 메모리인 RAM에 존재하지 않는 상황을 말한다.
+-   프로세스의 전체 페이지가 적재되어 있는 Swap device(디스크)에서 페이지를 가져온다.
+-   메인 메모리로 디스크 I/O가 발생하므로 입출력 병목현상이 따른다.
 
 ### Page fault와 Segmentation fault의 차이점
 
 -   Page fault는 필요한 페이지가 메모리에 없어서 디스크에서 가져와야 하는 상황을 말한다.
 -   Segmentation fault는 잘못된 메모리 접근으로 올바르지 않은 메모리 주소를 참조한 상황을 말한다.
 -   Page fault는 페이지를 swap space(디스크)에서 가져오지만 Segmentation fault는 잘못된 주소를 접근했기 때문에 프로세스를 중단한다.
+
+### Journaling이란 무엇인가?
+
+-   파일 시스템에서 쓰기 작업을 할 때, 업데이트 할 데이터를 다른 공간(저널 공간)에 써 놓고 그 정보를 바탕으로 디스크에 작성하는 것
+-   파일 시스템에서 쓰기 작업은 데이터 블록의 특성 때문에 세 번의 쓰기 연산이 필요함. (Bitmap, Inode, Data blocks)
+-   디스크는 느리기 때문에 파일 시스템은 쓰기 연산들을 모아 두었다가 한번에 업데이트 함. 그러나 중간에 정전 같은 문제가 발생하면 Crash-consistency problem(일관성 문제) 발생함. 따라서 디스크에 쓸 내용을 미리 다른 곳에 써 놓아서 시스템에 문제가 생겨도 다른 곳에 써 놓은 내용을 보고 업데이트 할 수 있도록 하는 과정이 journaling임.
+-   Journal write, Journal commit, checkpoint 단계로 나뉨.
+-   Journal write: 저널 공간에 트랜잭션 내용(TxB(Transaction Begin), Inode, Bitmap, Data block) 작성
+-   Journal commit: 위의 4개를 기록하는 트랜잭션 완료되었으면 TxE(Transaction End)를 추가함
+-   Checkpoint: 저널 공간의 정보로 실제 디스크 업데이트
